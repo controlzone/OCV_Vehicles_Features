@@ -22,11 +22,12 @@ class KeypointData(object):
         
     @staticmethod
     def load(file_name):
+        print ("Loading file: %s" % file_name)
         data = pickle.load(open(file_name, "rb" ))
         
         keypoints = []
         descriptors = []
-        
+        print data
         for entry in data:
             point = entry[0]
             size = entry[1]

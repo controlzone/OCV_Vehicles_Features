@@ -80,7 +80,8 @@ def process_frame(frame_number, frame, keypoint_data, detector, matcher):
     kp, des = detector.detectAndCompute(frame, None)
     
     # Match descriptors
-    matches = matcher.match(keypoint_data.descriptors, des)
+    matches = matcher.match(keypoint_data.descriptors, des) # 2.4.9 "home made"
+    #matches = cv2.drawMatches(keypoint_data.descriptors, des)  # 3.0.0
     
     # Sort them in order of distance
     matches = sorted(matches, key = lambda x:x.distance)
@@ -98,9 +99,19 @@ def main():
     log.debug("Loading keypoint data from '%s'...", KEYPOINT_DATA_FILE)
     try:
         keypoint_data = KeypointData.load(KEYPOINT_DATA_FILE)
+#        KeypointData(keypoints, descriptors)
         print "Loaded keypoints"
     except:
-        print "failed to load keypoints"
+        log.debug("failed to load keypoints")
+        log.debug("Attempting to create keypoint data")
+        base_image = cv2.imread("car.png")
+        base_processed = base_image.copy()
+        base_gray = cv2.cvtColor(base_image, cv2.COLOR_BGR2GRAY)
+        
+        base_sift = cv2.xfeatures2d.SIFT_create(nfeatures=0, nOctaveLayers=5, contrastThreshold=0.05, edgeThreshold=30, sigma=1.5)
+        
+        (base_kpts, base_desc) = base_sift.detectAndCompute(base_image, None)
+        
         
     log.debug("Creating SIFT detector...")
 #    sift = cv2.SIFT(nfeatures=0, nOctaveLayers=5, contrastThreshold=0.05, edgeThreshold=30, sigma=1.5)
@@ -136,7 +147,10 @@ def main():
                 , frame_number, frame, "source frame #%d")
         
         log.debug("Processing frame #%d...", frame_number)
-        processed = process_frame(frame_number, frame, keypoint_data, sift, bf)
+        
+        #processed = process_frame(frame_number, frame, keypoint_data, sift, bf)
+        ##          process_frame(frame_number, frame, keypoint_data, detector, matcher)
+        processed = process_frame(frame_number, frame, (base_kpts, base_desc), sift, bf)
         
         save_frame(IMAGE_DIR + "/processed_%04d.png"
             , frame_number, processed, "processed frame #%d")
