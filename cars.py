@@ -16,8 +16,10 @@ IMAGE_DIR = "images"
 IMAGE_FILENAME_FORMAT = IMAGE_DIR + "/frame_%04d.png"
 KEYPOINT_DATA_FILE = "keypoints.p"
 
-##    Keypoints looks likeit beeds to have the SIFT func
-##    put over the cars.png image and stored in the pickle .p
+##  Keypoints looks like it needs to have the SIFT func
+##  put over the cars.png image and stored in the pickle .p
+##  Turns out I am blind and there is a file 'create_kd_sift.py'
+##  that does exactly that. Just need to port it to 3.0.0
 
 # Support either video file or individual frames
 CAPTURE_FROM_VIDEO = False
@@ -72,13 +74,13 @@ def save_frame(file_name_format, frame_number, frame, label_format):
 
 def process_frame(frame_number, frame, keypoint_data, detector, matcher):
     log = logging.getLogger("process_frame")
-
+    log.debug("Process frame:")
     # Create a copy of source frame to draw into
     processed = frame.copy()
 
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     kp, des = detector.detectAndCompute(frame, None)
-    
+    log.debug("detectAndCompute complete")
     # Match descriptors
     matches = matcher.match(keypoint_data.descriptors, des) # 2.4.9 "home made"
     #matches = cv2.drawMatches(keypoint_data.descriptors, des)  # 3.0.0
